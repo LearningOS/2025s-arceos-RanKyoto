@@ -45,7 +45,7 @@ jobs:
           cargo install cargo-binutils
 
           mkdir -p /opt/musl && cd /opt/musl
-wget -O aarch64-linux-musl-cross.tgz \
+          wget -O aarch64-linux-musl-cross.tgz \
             https://github.com/xmake-mirror/musl.cc/releases/download/20210202/aarch64-linux-musl-cross.linux.tgz
           wget -O riscv64-linux-musl-cross.tgz \
             https://github.com/xmake-mirror/musl.cc/releases/download/20210202/riscv64-linux-musl-cross.linux.tgz
