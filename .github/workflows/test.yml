@@ -45,12 +45,9 @@ jobs:
           cargo install cargo-binutils
 
           mkdir -p /opt/musl && cd /opt/musl
-          wget -O aarch64-linux-musl-cross.tgz \
-            https://github.com/xmake-mirror/musl.cc/releases/download/20210202/aarch64-linux-musl-cross.linux.tgz
-          wget -O riscv64-linux-musl-cross.tgz \
-            https://github.com/xmake-mirror/musl.cc/releases/download/20210202/riscv64-linux-musl-cross.linux.tgz
-          wget -O x86_64-linux-musl-cross.tgz \
-            https://github.com/xmake-mirror/musl.cc/releases/download/20210202/x86_64-linux-musl-cross.linux.tgz
+          wget https://download.wireguard.com/qemu-test/toolchains/20211123/aarch64-linux-musl-cross.tgz
+          wget https://download.wireguard.com/qemu-test/toolchains/20211123/riscv64-linux-musl-cross.tgz
+          wget https://download.wireguard.com/qemu-test/toolchains/20211123/x86_64-linux-musl-cross.tgz
           tar zxf aarch64-linux-musl-cross.tgz
           tar zxf riscv64-linux-musl-cross.tgz
           tar zxf x86_64-linux-musl-cross.tgz
