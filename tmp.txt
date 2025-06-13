@@ -1,0 +1,24 @@
+    [92;1mCreating[0m FAT32 disk image "disk.img" ...
+Has color
+Has Hello, Arceos!
+print_with_color pass
+    [92;1mCreating[0m FAT32 disk image "disk.img" ...
+ramfs_rename fault
+    [92;1mCreating[0m FAT32 disk image "disk.img" ...
+alt_alloc pass
+    [92;1mCreating[0m FAT32 disk image "disk.img" ...
+support_hashmap pass
+    [92;1mCreating[0m FAT32 disk image "disk.img" ...
+make -C origin
+make -C hello_c
+riscv64-linux-musl-gcc -static hello.c -o hello
+File 'payload/mapfile_c/mapfile' doesn't exist!
+sys_mmap default
+    [92;1mCreating[0m FAT32 disk image "disk.img" ...
+make -C origin
+make[2]: Nothing to be done for `all'.
+make -C hello_c
+riscv64-linux-musl-gcc -static hello.c -o hello
+File 'payload/skernel2/skernel2' doesn't exist!
+simple_hv default
+300

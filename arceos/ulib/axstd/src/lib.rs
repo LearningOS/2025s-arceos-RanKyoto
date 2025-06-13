@@ -55,7 +55,15 @@ extern crate alloc;
 
 #[cfg(feature = "alloc")]
 #[doc(no_inline)]
-pub use alloc::{boxed, collections, format, string, vec};
+pub use alloc::{boxed, format, string, vec};
+
+// 在 no_std 环境下，才使用：alloc::collections
+// 目前 Rust 的 alloc::collections 不支持 HashMap
+// 现在我们在自己的 collections 下写了一个简单的 HashMap
+// 为了调用其他的 alloc::collections 的数据结构
+// 在 axstd::collection 下引入 alloc::collections::*
+#[cfg(feature = "alloc")]
+pub mod collections;
 
 #[doc(no_inline)]
 pub use core::{arch, cell, cmp, hint, marker, mem, ops, ptr, slice, str};
