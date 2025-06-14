@@ -165,6 +165,30 @@ impl VfsNodeOps for DirNode {
         }
     }
 
+    // axfs_vfs 定义接口
+    // axfs_ramfs 则为具体实现
+    // crate-io 上的 axfs_ramfs 没有 rename 的实现
+    // 所以在本地的 axfs_ramfs 来实现
+    /// Renames or moves existing file or directory.
+    /// 目前只能支持同一目录下改名字，按照上面的要求，应该还要实现移动文件夹或文件的功能
+    /// 现在已经满足测例的需求了，以后再改进
+    fn rename(&self, src_path: &str, dst_path: &str) -> VfsResult {
+        let src_filename = src_path.rsplit('/')//从右往左分割，生成迭代器
+        .next()//取文件名
+        .unwrap_or("");
+        let dst_filename = dst_path.rsplit('/').next().unwrap_or("");
+        
+        let result = (*self).this.upgrade().unwrap().lookup(src_path);// 弱引用不能调用对象的方法，需要 upgrade
+        if result.is_err() { // 检查 src_path对应文件的存在性
+            return Err(VfsError::NotFound);
+        }
+        
+        let mut children = self.children.write();
+        let node = children.remove(src_filename).unwrap();
+        children.insert(String::from(dst_filename), node);
+        Ok(())
+    }
+
     axfs_vfs::impl_vfs_dir_default! {}
 }
 

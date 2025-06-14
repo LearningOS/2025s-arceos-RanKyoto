@@ -91,7 +91,10 @@ axtask = { path = "modules/axtask" }
 axdma = { path = "modules/axdma" }
 elf = { path = "modules/elf" }
 
-[patch.crates-io]
+#用本地路径覆盖 crates.io 版本
+#全局生效，包括直接和间接依赖
+[patch.crates-io] 
+axfs_ramfs = { path = "axfs_ramfs" }
 kernel_guard = { path = "../crates/kernel_guard"} 
 [profile.release]
 lto = true
