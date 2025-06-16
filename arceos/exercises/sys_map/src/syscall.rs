@@ -9,6 +9,10 @@ use axtask::TaskExtRef;
 use axhal::paging::MappingFlags;
 use arceos_posix_api as api;
 
+use axhal::mem::{PAGE_SIZE_4K, phys_to_virt};
+use memory_addr::VirtAddr;
+use std::vec;
+
 const SYS_IOCTL: usize = 29;
 const SYS_OPENAT: usize = 56;
 const SYS_CLOSE: usize = 57;
@@ -133,14 +137,46 @@ fn handle_syscall(tf: &TrapFrame, syscall_num: usize) -> isize {
 
 #[allow(unused_variables)]
 fn sys_mmap(
-    addr: *mut usize,
-    length: usize,
-    prot: i32,
-    flags: i32,
-    fd: i32,
-    _offset: isize,
-) -> isize {
-    unimplemented!("no sys_mmap!");
+    addr: *mut usize, //指向虚拟地址的指针，一般传 NULL
+    length: usize, //要映射的内存长度，需要页对齐
+    prot: i32, //访问权限 读，写，可执行
+    flags: i32, //映射类型
+    fd: i32, //文件描述符
+    _offset: isize, //文件偏移
+) -> isize { //成功时返回虚拟地址 vaddr
+    // 见测例 arceos/payload/mapfile_c/mapfile.c
+    // 测例调用了系统调用 mmap
+
+    //将文件读取到缓冲区
+    let mut buf = vec![0u8; length]; 
+    let file = arceos_posix_api::get_file_like(fd).unwrap();
+    file.read(&mut buf).unwrap();
+
+    let current = axtask::current();//获取当前线程
+    let mut uspace = current.task_ext().aspace.lock();//对地址空间加锁
+
+    let aligned_size = (length + PAGE_SIZE_4K - 1) / PAGE_SIZE_4K * PAGE_SIZE_4K; // 向上对齐到一页，length 不足一页就分配一页
+    // 找到第一个用户空间的可用地址
+    // NULL as usize == 0， 如果 hint 小于用户空间的起始位置
+    // 则第一个用户空间的可用地址为uspace.va_range的第一个可以使用的位置
+    let vaddr = uspace.find_free_area(VirtAddr::from(addr as usize), aligned_size, uspace.va_range).unwrap();
+
+    // 分配内存 arceos/tour/m_1_0/src/loader.rs
+    uspace.map_alloc(vaddr, aligned_size, MappingFlags::READ|MappingFlags::WRITE|MappingFlags::EXECUTE|MappingFlags::USER, true).unwrap();
+    
+    let (paddr, _, _) = uspace
+        .page_table()
+        .query(vaddr.into())
+        .unwrap_or_else(|_| panic!("Mapping failed for segment: {:#x}", vaddr));
+    
+    unsafe {
+        core::ptr::copy_nonoverlapping(
+            buf.as_ptr(),
+            phys_to_virt(paddr).as_mut_ptr(),
+            PAGE_SIZE_4K,
+        );
+    }
+    vaddr.as_usize() as isize
 }
 
 fn sys_openat(dfd: c_int, fname: *const c_char, flags: c_int, mode: api::ctypes::mode_t) -> isize {
